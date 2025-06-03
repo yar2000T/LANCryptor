@@ -1,0 +1,10 @@
+{
+    "send_tab": "Send",
+    "receive_tab": "Receive",
+    "history_tab": "History",
+    "toggle_theme": "Toggle Theme",
+    "settings": "Settings",
+    "browse": "Browse",
+    "send_file": "Send File",
+    "receiver_status": "Receiver Status"
+}
