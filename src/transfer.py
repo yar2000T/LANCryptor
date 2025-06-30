@@ -6,7 +6,7 @@ import zipfile
 import io
 import logging
 import threading
-from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives import serialization, hashes, padding
 from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding, rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -118,7 +118,6 @@ def send_file(ip, filepath, progress_callback=None, status_callback=None):
 
         generate_keys()
 
-        filesize = os.path.getsize(filepath)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((ip, PORT))
             s.sendall(b"REQ_PUBLIC_KEY")
@@ -136,13 +135,23 @@ def send_file(ip, filepath, progress_callback=None, status_callback=None):
             s.sendall(filename.encode().ljust(256, b'\x00'))
 
             compressed_data = compress_file(filepath)
+
+            digest = hashes.Hash(hashes.SHA256())
+            digest.update(compressed_data)
+            file_hash = digest.finalize()
+            s.sendall(file_hash)
+            logging.info(f"Sent file hash: {file_hash.hex()}")
+
             s.sendall(struct.pack("Q", len(compressed_data)))
 
             cipher = create_cipher(aes_key, iv)
             encryptor = cipher.encryptor()
 
             sent = 0
-            with io.BytesIO(compressed_data) as f:
+            padder = padding.PKCS7(128).padder()
+            padded_data = padder.update(compressed_data) + padder.finalize()
+
+            with io.BytesIO(padded_data) as f:
                 while chunk := f.read(BUFFER_SIZE):
                     encrypted = encryptor.update(chunk)
                     s.sendall(encrypted)
@@ -174,6 +183,9 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None):
         aes_key, iv = aes_key_iv[:AES_KEY_SIZE], aes_key_iv[AES_KEY_SIZE:]
 
         filename = conn.recv(256).rstrip(b'\x00').decode()
+
+        expected_hash = conn.recv(32)
+
         filesize = struct.unpack("Q", conn.recv(8))[0]
 
         os.makedirs(RECEIVED_DIR, exist_ok=True)
@@ -193,9 +205,25 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None):
         final = decryptor.finalize()
         zip_data.write(final)
 
-        decompress_file(zip_data.getvalue(), filename)
+        padded = zip_data.getvalue()
+        unpadder = padding.PKCS7(128).unpadder()
+        unpadded_data = unpadder.update(padded) + unpadder.finalize()
+
+        # Перевірити хеш
+        digest = hashes.Hash(hashes.SHA256())
+        digest.update(unpadded_data)
+        actual_hash = digest.finalize()
+
+        logging.info(f"Received hash: {expected_hash.hex()}")
+        logging.info(f"Actual hash:   {actual_hash.hex()}")
+
+        if actual_hash != expected_hash:
+            logging.error("File integrity check failed!")
+            return
+
+        decompress_file(unpadded_data, filename)
         if status_callback:
-            status_callback(f"File received: {filename}")
+            status_callback(f"File received: {filename} ✅")
     except Exception as e:
         logging.error(f"Error handling client: {e}")
         if status_callback:

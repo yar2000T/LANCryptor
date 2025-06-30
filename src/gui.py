@@ -6,6 +6,7 @@ from settings import SettingsDialog
 from history import FileTransferHistory
 from utils import load_language
 from transfer import send_file, receiver_thread
+from transfer import get_local_ip
 
 class LANCryptorApp(ctk.CTk):
     def __init__(self):
@@ -14,6 +15,7 @@ class LANCryptorApp(ctk.CTk):
         self.geometry("600x400")
         ctk.set_appearance_mode("System")
         ctk.set_default_color_theme("dark-blue")
+        self.receiver_running = False
 
         self.language = load_language('en')  # Default language
         self.history = FileTransferHistory()
@@ -73,6 +75,12 @@ class LANCryptorApp(ctk.CTk):
         self.start_receiver_button = ctk.CTkButton(self.receive_tab, text="Start Receiver", command=self.start_receiver_thread)
         self.start_receiver_button.pack(pady=10)
 
+        ip_label_frame = ctk.CTkFrame(self.receive_tab)
+        ip_label_frame.pack(fill="x", pady=(10, 0), padx=10)
+
+        ip_label = ctk.CTkLabel(ip_label_frame, text=f"Your IP: {get_local_ip()}")
+        ip_label.pack(anchor="e", padx=5)
+
     def init_history_tab(self):
         self.history_text = ctk.CTkTextbox(self.history_tab)
         self.history_text.pack(expand=True, fill="both", padx=10, pady=10)
@@ -105,6 +113,12 @@ class LANCryptorApp(ctk.CTk):
         self.update_history_display()
 
     def start_receiver_thread(self):
+        if self.receiver_running:
+            self.update_recv_status("Receiver already running.")
+            return
+
+        self.receiver_running = True
+        self.receive_status.configure(text="Receiver running...")
         threading.Thread(
             target=receiver_thread,
             args=(self.update_recv_status, self.update_recv_progress),
