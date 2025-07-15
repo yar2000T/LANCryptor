@@ -31,7 +31,7 @@ jobs:
 
     - name: Zip EXE
       run: |
-        powershell Compress-Archive -Path dist/LANCryptor.exe -DestinationPath LANCryptor-win.zip
+        Compress-Archive -Path dist\LANCryptor.exe -DestinationPath LANCryptor-win.zip
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
