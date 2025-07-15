@@ -66,19 +66,6 @@ class LANCryptorApp(ctk.CTk):
         self._build_receive_tab()
         self._build_history_tab()
 
-        self.bottom_frame = ctk.CTkFrame(self)
-        self.bottom_frame.pack(fill="x", padx=10, pady=5)
-
-        self.theme_button = ctk.CTkButton(
-            self.bottom_frame, text="Toggle Theme", command=self.toggle_theme
-        )
-        self.theme_button.pack(side="left", padx=5)
-
-        self.settings_button = ctk.CTkButton(
-            self.bottom_frame, text="Settings", command=self.open_settings
-        )
-        self.settings_button.pack(side="left", padx=5)
-
     def _build_send_tab(self):
         frame = ctk.CTkFrame(self.send_tab)
         frame.pack(expand=True, fill="both", padx=10, pady=10)
@@ -198,14 +185,6 @@ class LANCryptorApp(ctk.CTk):
 
     def _update_recv_progress(self, percent):
         self.recv_progress.set(percent)
-
-    def toggle_theme(self):
-        ctk.set_appearance_mode(
-            "dark" if ctk.get_appearance_mode() == "light" else "light"
-        )
-
-    def open_settings(self):
-        messagebox.showinfo("Settings", "Settings dialog not implemented.")
 
     def _update_history_display(self):
         self.history_text.delete("1.0", "end")
