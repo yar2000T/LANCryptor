@@ -1,0 +1,39 @@
+name: Build & Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install deps
+      run: |
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Build EXE
+      run: |
+        pyinstaller src/main.py ^
+          --name LANCryptor ^
+          --onefile ^
+          --distpath dist ^
+          --workpath build ^
+          --specpath build
+
+    - name: Zip EXE
+      run: |
+        powershell Compress-Archive -Path dist/LANCryptor.exe -DestinationPath LANCryptor-win.zip
+
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: LANCryptor-win.zip
