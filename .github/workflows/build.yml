@@ -22,11 +22,11 @@ jobs:
 
     - name: Build EXE
       run: |
-        pyinstaller src/main.py ^
-          --name LANCryptor ^
-          --onefile ^
-          --distpath dist ^
-          --workpath build ^
+        pyinstaller src/main.py `
+          --name LANCryptor `
+          --onefile `
+          --distpath dist `
+          --workpath build `
           --specpath build
 
     - name: Zip EXE
