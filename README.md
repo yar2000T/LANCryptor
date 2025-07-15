@@ -6,7 +6,7 @@
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 ![Linted with Ruff](https://img.shields.io/badge/linter-ruff-success?logo=python)
 ![Formatted with Black](https://img.shields.io/badge/code%20style-black-000000)
-
+[![Build & Release](https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml)
 ---
 
 ## 📦 Features
