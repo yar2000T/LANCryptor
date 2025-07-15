@@ -25,6 +25,7 @@ confirmation_queue = queue.Queue()
 confirmation_event = threading.Event()
 confirmation_result = None  # True/False from UI
 
+
 def recv_exact(sock, n):
     data = b""
     while len(data) < n:
@@ -33,6 +34,7 @@ def recv_exact(sock, n):
             raise ConnectionError("Socket connection lost during recv_exact")
         data += packet
     return data
+
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -45,6 +47,7 @@ def get_local_ip():
         s.close()
     return ip
 
+
 def generate_keys():
     if not os.path.exists(KEY_FILE_PRIVATE):
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -55,25 +58,32 @@ def generate_keys():
             os.makedirs(priv_dir, exist_ok=True)
 
         with open(KEY_FILE_PRIVATE, "wb") as f:
-            f.write(private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
+            f.write(
+                private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
 
         with open(KEY_FILE_PUBLIC, "wb") as f:
-            f.write(public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            ))
+            f.write(
+                public_key.public_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PublicFormat.SubjectPublicKeyInfo,
+                )
+            )
+
 
 def load_private_key():
     with open(KEY_FILE_PRIVATE, "rb") as f:
         return serialization.load_pem_private_key(f.read(), password=None)
 
+
 def load_public_key():
     with open(KEY_FILE_PUBLIC, "rb") as f:
         return serialization.load_pem_public_key(f.read())
+
 
 def encrypt_aes_key(aes_key, public_key):
     return public_key.encrypt(
@@ -81,9 +91,10 @@ def encrypt_aes_key(aes_key, public_key):
         asymmetric_padding.OAEP(
             mgf=asymmetric_padding.MGF1(algorithm=hashes.SHA256()),
             algorithm=hashes.SHA256(),
-            label=None
-        )
+            label=None,
+        ),
     )
+
 
 def decrypt_aes_key(enc_key, private_key):
     return private_key.decrypt(
@@ -91,12 +102,14 @@ def decrypt_aes_key(enc_key, private_key):
         asymmetric_padding.OAEP(
             mgf=asymmetric_padding.MGF1(algorithm=hashes.SHA256()),
             algorithm=hashes.SHA256(),
-            label=None
-        )
+            label=None,
+        ),
     )
+
 
 def create_cipher(key, iv):
     return Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+
 
 def compress_file(filepath):
     zip_buffer = io.BytesIO()
@@ -104,9 +117,11 @@ def compress_file(filepath):
         zip_file.write(filepath, os.path.basename(filepath))
     return zip_buffer.getvalue()
 
+
 def decompress_file(zip_data):
     with zipfile.ZipFile(io.BytesIO(zip_data)) as zip_file:
         zip_file.extractall(RECEIVED_DIR)
+
 
 def confirm_receiver(pubkey_hash: str) -> bool:
     """Called in receiver thread, blocks until UI thread sets the result."""
@@ -116,12 +131,16 @@ def confirm_receiver(pubkey_hash: str) -> bool:
     confirmation_event.clear()
     return confirmation_result
 
+
 def set_confirmation_result(result: bool):
     global confirmation_result
     confirmation_result = result
     confirmation_event.set()
 
-def send_file(ip, filepath, progress_callback=None, status_callback=None, stop_event=None):
+
+def send_file(
+    ip, filepath, progress_callback=None, status_callback=None, stop_event=None
+):
     try:
         if not os.path.isfile(filepath):
             raise FileNotFoundError(f"File '{filepath}' does not exist.")
@@ -146,11 +165,13 @@ def send_file(ip, filepath, progress_callback=None, status_callback=None, stop_e
             receiver_pubkey_hash = digest.finalize().hex()
 
             if status_callback:
-                status_callback(f"Receiver public key hash:\n{receiver_pubkey_hash}\nWaiting for receiver confirmation...")
+                status_callback(
+                    f"Receiver public key hash:\n{receiver_pubkey_hash}\nWaiting for receiver confirmation..."
+                )
 
             # Wait for confirmation byte from receiver
             confirmation_byte = s.recv(1)
-            if confirmation_byte != b'\x01':
+            if confirmation_byte != b"\x01":
                 if status_callback:
                     status_callback("Receiver rejected the connection.")
                 s.close()
@@ -167,7 +188,7 @@ def send_file(ip, filepath, progress_callback=None, status_callback=None, stop_e
             s.sendall(encrypted_key)
 
             filename = os.path.basename(filepath)
-            s.sendall(filename.encode().ljust(256, b'\x00'))
+            s.sendall(filename.encode().ljust(256, b"\x00"))
 
             compressed_data = compress_file(filepath)
 
@@ -205,6 +226,7 @@ def send_file(ip, filepath, progress_callback=None, status_callback=None, stop_e
         if status_callback:
             status_callback(f"Error: {e}")
 
+
 def handle_client(conn, addr, status_callback=None, progress_callback=None):
     try:
         conn.settimeout(60)
@@ -224,26 +246,28 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None):
         receiver_pubkey_hash = digest.finalize().hex()
 
         if status_callback:
-            status_callback(f"Connection from {addr[0]} - Confirm receiver key:\n{receiver_pubkey_hash}")
+            status_callback(
+                f"Connection from {addr[0]} - Confirm receiver key:\n{receiver_pubkey_hash}"
+            )
 
         # Ask UI to confirm receiver public key hash
         confirmed = confirm_receiver(receiver_pubkey_hash)
         if not confirmed:
             if status_callback:
                 status_callback("Connection rejected by user.")
-            conn.sendall(b'\x00')
+            conn.sendall(b"\x00")
             conn.close()
             return
 
         # Send approval to sender
-        conn.sendall(b'\x01')
+        conn.sendall(b"\x01")
 
         enc_key_len = struct.unpack("I", recv_exact(conn, 4))[0]
         enc_key = recv_exact(conn, enc_key_len)
         aes_key_iv = decrypt_aes_key(enc_key, load_private_key())
         aes_key, iv = aes_key_iv[:AES_KEY_SIZE], aes_key_iv[AES_KEY_SIZE:]
 
-        filename = recv_exact(conn, 256).rstrip(b'\x00').decode()
+        filename = recv_exact(conn, 256).rstrip(b"\x00").decode()
 
         expected_hash = recv_exact(conn, 32)
 
@@ -297,6 +321,7 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None):
     finally:
         conn.close()
 
+
 def receiver_thread(status_callback=None, progress_callback=None, stop_event=None):
     generate_keys()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -315,7 +340,7 @@ def receiver_thread(status_callback=None, progress_callback=None, stop_event=Non
                 threading.Thread(
                     target=handle_client,
                     args=(conn, addr, status_callback, progress_callback),
-                    daemon=True
+                    daemon=True,
                 ).start()
             except socket.timeout:
                 continue  # 🔸 перевірити stop_event знову

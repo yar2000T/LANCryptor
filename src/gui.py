@@ -1,10 +1,19 @@
+from tkinter import filedialog, messagebox
 import customtkinter as ctk
 import threading
 import queue
-import transfer  # your transfer.py module
+import transfer
+
 
 class PlaceholderEntry(ctk.CTkEntry):
-    def __init__(self, master=None, placeholder="", placeholder_color="grey", normal_color="black", **kwargs):
+    def __init__(
+        self,
+        master=None,
+        placeholder="",
+        placeholder_color="grey",
+        normal_color="black",
+        **kwargs,
+    ):
         super().__init__(master, **kwargs)
         self.placeholder = placeholder
         self.placeholder_color = placeholder_color
@@ -26,6 +35,7 @@ class PlaceholderEntry(ctk.CTkEntry):
         if not self.get():
             self.insert(0, self.placeholder)
             self.configure(text_color=self.placeholder_color)
+
 
 class LANCryptorApp(ctk.CTk):
     def __init__(self):
@@ -59,10 +69,14 @@ class LANCryptorApp(ctk.CTk):
         self.bottom_frame = ctk.CTkFrame(self)
         self.bottom_frame.pack(fill="x", padx=10, pady=5)
 
-        self.theme_button = ctk.CTkButton(self.bottom_frame, text="Toggle Theme", command=self.toggle_theme)
+        self.theme_button = ctk.CTkButton(
+            self.bottom_frame, text="Toggle Theme", command=self.toggle_theme
+        )
         self.theme_button.pack(side="left", padx=5)
 
-        self.settings_button = ctk.CTkButton(self.bottom_frame, text="Settings", command=self.open_settings)
+        self.settings_button = ctk.CTkButton(
+            self.bottom_frame, text="Settings", command=self.open_settings
+        )
         self.settings_button.pack(side="left", padx=5)
 
     def _build_send_tab(self):
@@ -70,16 +84,22 @@ class LANCryptorApp(ctk.CTk):
         frame.pack(expand=True, fill="both", padx=10, pady=10)
 
         self.file_path_var = ctk.StringVar()
-        self.entry_file = ctk.CTkEntry(frame, textvariable=self.file_path_var, width=400)
+        self.entry_file = ctk.CTkEntry(
+            frame, textvariable=self.file_path_var, width=400
+        )
         self.entry_file.pack(pady=(10, 5), padx=10)
 
-        self.browse_button = ctk.CTkButton(frame, text="Browse", command=self.browse_file)
+        self.browse_button = ctk.CTkButton(
+            frame, text="Browse", command=self.browse_file
+        )
         self.browse_button.pack(pady=5)
 
         self.entry_ip = PlaceholderEntry(frame, placeholder="Receiver IP", width=400)
         self.entry_ip.pack(pady=10, padx=10)
 
-        self.send_button = ctk.CTkButton(frame, text="Send File", command=self.send_file_thread)
+        self.send_button = ctk.CTkButton(
+            frame, text="Send File", command=self.send_file_thread
+        )
         self.send_button.pack(pady=10)
 
         self.send_progress = ctk.CTkProgressBar(frame, width=400)
@@ -100,10 +120,14 @@ class LANCryptorApp(ctk.CTk):
         self.recv_progress.pack(pady=10)
         self.recv_progress.set(0)
 
-        self.start_receiver_button = ctk.CTkButton(frame, text="Start Receiver", command=self.start_receiver_thread)
+        self.start_receiver_button = ctk.CTkButton(
+            frame, text="Start Receiver", command=self.start_receiver_thread
+        )
         self.start_receiver_button.pack(pady=10)
 
-        self.stop_recv_button = ctk.CTkButton(frame, text="Stop Receiving", command=self.stop_receive)
+        self.stop_recv_button = ctk.CTkButton(
+            frame, text="Stop Receiving", command=self.stop_receive
+        )
         self.stop_recv_button.pack(pady=5)
 
         ip_label = ctk.CTkLabel(frame, text=f"Your IP: {transfer.get_local_ip()}")
@@ -132,7 +156,7 @@ class LANCryptorApp(ctk.CTk):
         threading.Thread(
             target=transfer.send_file,
             args=(ip, filepath, self._update_send_progress, self._update_send_status),
-            daemon=True
+            daemon=True,
         ).start()
 
     def stop_receive(self):
@@ -158,8 +182,12 @@ class LANCryptorApp(ctk.CTk):
         self.stop_event = threading.Event()
         self.receive_thread = threading.Thread(
             target=transfer.receiver_thread,
-            args=(self._update_recv_status, self._update_recv_progress, self.stop_event),
-            daemon=True
+            args=(
+                self._update_recv_status,
+                self._update_recv_progress,
+                self.stop_event,
+            ),
+            daemon=True,
         )
         self.receive_thread.start()
 
@@ -172,7 +200,9 @@ class LANCryptorApp(ctk.CTk):
         self.recv_progress.set(percent)
 
     def toggle_theme(self):
-        ctk.set_appearance_mode("dark" if ctk.get_appearance_mode() == "light" else "light")
+        ctk.set_appearance_mode(
+            "dark" if ctk.get_appearance_mode() == "light" else "light"
+        )
 
     def open_settings(self):
         messagebox.showinfo("Settings", "Settings dialog not implemented.")
@@ -189,11 +219,14 @@ class LANCryptorApp(ctk.CTk):
             pubkey_hash = None
 
         if pubkey_hash:
-            answer = messagebox.askyesno("Confirm sender public key",
-                                         f"Incoming connection with public key hash:\n\n{pubkey_hash}\n\nAccept?")
+            answer = messagebox.askyesno(
+                "Confirm sender public key",
+                f"Incoming connection with public key hash:\n\n{pubkey_hash}\n\nAccept?",
+            )
             transfer.confirmation_result = answer
             transfer.confirmation_event.set()
         self.after(100, self._poll_confirmation)
+
 
 if __name__ == "__main__":
     app = LANCryptorApp()

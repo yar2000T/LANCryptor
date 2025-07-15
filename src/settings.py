@@ -1,5 +1,6 @@
 import customtkinter as ctk
 
+
 class SettingsDialog(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
@@ -10,7 +11,9 @@ class SettingsDialog(ctk.CTkToplevel):
         self.theme_label.pack(pady=10)
 
         self.theme_var = ctk.StringVar(value="System")
-        self.theme_option = ctk.CTkOptionMenu(self, values=["System", "Dark", "Light"], variable=self.theme_var)
+        self.theme_option = ctk.CTkOptionMenu(
+            self, values=["System", "Dark", "Light"], variable=self.theme_var
+        )
         self.theme_option.pack(pady=5)
 
         self.save_button = ctk.CTkButton(self, text="Save", command=self.save_settings)
