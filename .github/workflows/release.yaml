@@ -44,6 +44,7 @@ jobs:
         release_name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
+        allowUpdates: true
       env:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
