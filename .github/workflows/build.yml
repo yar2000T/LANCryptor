@@ -1,44 +1,39 @@
-name: Build EXE & Upload
+name: Build Portable EXE
 
 on:
-  push:
-    branches: [master]
+  workflow_dispatch:
   pull_request:
 
 jobs:
-  build-windows:
-    name: Windows EXE Build
+  build:
     runs-on: windows-latest
 
     steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: 🐍 Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/setup-python@v4
       with:
         python-version: "3.10"
 
-    - name: 📦 Install dependencies
+    - name: Install deps
       run: |
-        python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: 🛠️ Build EXE with PyInstaller
+    - name: Build EXE
       run: |
         pyinstaller src/main.py ^
-          --onefile ^
           --name LANCryptor ^
+          --onefile ^
           --distpath dist ^
           --workpath build ^
           --specpath build
 
-    - name: 📦 Zip EXE
+    - name: Zip EXE
       run: |
         powershell Compress-Archive -Path dist/LANCryptor.exe -DestinationPath LANCryptor-win.zip
 
-    - name: 📤 Upload EXE Artifact
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: LANCryptor-win
