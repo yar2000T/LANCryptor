@@ -22,16 +22,16 @@ jobs:
 
     - name: Build EXE
       run: |
-        pyinstaller src/main.py ^
-          --name LANCryptor ^
-          --onefile ^
-          --distpath dist ^
-          --workpath build ^
+        pyinstaller src/main.py `
+          --name LANCryptor `
+          --onefile `
+          --distpath dist `
+          --workpath build `
           --specpath build
 
     - name: Zip EXE
       run: |
-        powershell Compress-Archive -Path dist/LANCryptor.exe -DestinationPath LANCryptor-win.zip
+        Compress-Archive -Path dist\LANCryptor.exe, README.md, LICENSE -DestinationPath LANCryptor-win.zip
 
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
