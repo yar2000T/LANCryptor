@@ -2,11 +2,8 @@ import customtkinter as ctk
 from tkinter import filedialog, messagebox
 import logging
 import threading
-from settings import SettingsDialog
-from history import FileTransferHistory
-from utils import load_language
-from transfer import send_file, receiver_thread
-from transfer import get_local_ip
+import queue
+import transfer  # Import your transfer.py module here
 
 class LANCryptorApp(ctk.CTk):
     def __init__(self):
@@ -17,10 +14,21 @@ class LANCryptorApp(ctk.CTk):
         ctk.set_default_color_theme("dark-blue")
         self.receiver_running = False
 
-        self.language = load_language('en')  # Default language
-        self.history = FileTransferHistory()
+        self.language = {
+            "send_tab": "Send",
+            "receive_tab": "Receive",
+            "history_tab": "History",
+            "browse": "Browse",
+            "send_file": "Send File",
+            "toggle_theme": "Toggle Theme",
+            "settings": "Settings",
+            "receiver_status": "Receiver not running",
+        }
+
+        self.history = []
 
         self.init_ui()
+        self.poll_confirmation()
 
     def init_ui(self):
         self.tabview = ctk.CTkTabview(self)
@@ -40,6 +48,7 @@ class LANCryptorApp(ctk.CTk):
         self.theme_button = ctk.CTkButton(self.menu_bar, text=self.language["toggle_theme"], command=self.toggle_theme)
         self.theme_button.pack(side="left", padx=5, pady=5)
 
+        # Settings button placeholder (no dialog in this example)
         self.settings_button = ctk.CTkButton(self.menu_bar, text=self.language["settings"], command=self.open_settings)
         self.settings_button.pack(side="left", padx=5, pady=5)
 
@@ -78,7 +87,7 @@ class LANCryptorApp(ctk.CTk):
         ip_label_frame = ctk.CTkFrame(self.receive_tab)
         ip_label_frame.pack(fill="x", pady=(10, 0), padx=10)
 
-        ip_label = ctk.CTkLabel(ip_label_frame, text=f"Your IP: {get_local_ip()}")
+        ip_label = ctk.CTkLabel(ip_label_frame, text=f"Your IP: {transfer.get_local_ip()}")
         ip_label.pack(anchor="e", padx=5)
 
     def init_history_tab(self):
@@ -95,11 +104,11 @@ class LANCryptorApp(ctk.CTk):
         filepath = self.file_path.get()
         ip = self.entry_ip.get().strip()
         if not filepath or not ip:
-            self.send_status.configure(text="Please provide file and IP.")
+            self.update_send_status("Please provide file and IP.")
             return
-        self.send_status.configure(text="Sending...")
+        self.update_send_status("Sending...")
         threading.Thread(
-            target=send_file,
+            target=transfer.send_file,
             args=(ip, filepath, self.update_send_progress, self.update_send_status),
             daemon=True
         ).start()
@@ -109,7 +118,7 @@ class LANCryptorApp(ctk.CTk):
 
     def update_send_status(self, msg):
         self.send_status.configure(text=msg)
-        self.history.add_transfer(self.file_path.get(), msg)
+        self.history.append(msg)
         self.update_history_display()
 
     def start_receiver_thread(self):
@@ -120,15 +129,14 @@ class LANCryptorApp(ctk.CTk):
         self.receiver_running = True
         self.receive_status.configure(text="Receiver running...")
         threading.Thread(
-            target=receiver_thread,
+            target=transfer.receiver_thread,
             args=(self.update_recv_status, self.update_recv_progress),
             daemon=True
         ).start()
-        self.receive_status.configure(text="Receiver running...")
 
     def update_recv_status(self, msg):
         self.receive_status.configure(text=msg)
-        self.history.add_transfer("Received File", msg)
+        self.history.append(msg)
         self.update_history_display()
 
     def update_recv_progress(self, percent):
@@ -140,9 +148,31 @@ class LANCryptorApp(ctk.CTk):
         ctk.set_appearance_mode(new_mode)
 
     def open_settings(self):
-        settings_dialog = SettingsDialog(self)
-        settings_dialog.grab_set()
+        # Placeholder for settings dialog
+        messagebox.showinfo("Settings", "Settings dialog not implemented.")
 
     def update_history_display(self):
         self.history_text.delete(1.0, ctk.END)
-        self.history_text.insert(ctk.END, self.history.get_history())
+        self.history_text.insert(ctk.END, "\n".join(self.history))
+
+    def poll_confirmation(self):
+        """Poll transfer.confirmation_queue for incoming confirmation requests."""
+        try:
+            pubkey_hash = transfer.confirmation_queue.get_nowait()
+        except queue.Empty:
+            pubkey_hash = None
+
+        if pubkey_hash:
+            answer = messagebox.askyesno("Confirm sender public key",
+                                         f"Incoming connection with public key hash:\n\n{pubkey_hash}\n\nAccept?")
+            # Set the result so transfer.confirm_sender can continue
+            transfer.confirmation_result = answer
+            transfer.confirmation_event.set()
+
+        self.after(100, self.poll_confirmation)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    app = LANCryptorApp()
+    app.mainloop()
