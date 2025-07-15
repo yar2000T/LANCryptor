@@ -121,7 +121,7 @@ def set_confirmation_result(result: bool):
     confirmation_result = result
     confirmation_event.set()
 
-def send_file(ip, filepath, progress_callback=None, status_callback=None):
+def send_file(ip, filepath, progress_callback=None, status_callback=None, stop_event=None):
     try:
         if not os.path.isfile(filepath):
             raise FileNotFoundError(f"File '{filepath}' does not exist.")
@@ -188,15 +188,15 @@ def send_file(ip, filepath, progress_callback=None, status_callback=None):
 
             with io.BytesIO(padded_data) as f:
                 while chunk := f.read(BUFFER_SIZE):
+                    if stop_event and stop_event.is_set():
+                        if status_callback:
+                            status_callback("Transfer stopped by user.")
+                        return
                     encrypted = encryptor.update(chunk)
                     s.sendall(encrypted)
                     sent += len(chunk)
                     if progress_callback:
                         progress_callback(sent / len(padded_data) * 100)
-                final = encryptor.finalize()
-                s.sendall(final)
-                if progress_callback:
-                    progress_callback(100)
 
             if status_callback:
                 status_callback("File sent successfully ✅")
@@ -297,19 +297,33 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None):
     finally:
         conn.close()
 
-def receiver_thread(status_callback=None, progress_callback=None):
+def receiver_thread(status_callback=None, progress_callback=None, stop_event=None):
     generate_keys()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(("", PORT))
     s.listen()
+    s.settimeout(1.0)  # 🔸 дозволяє перевіряти stop_event кожну секунду
+
     if status_callback:
         status_callback("Listening for incoming files...")
+
     try:
-        while True:
-            conn, addr = s.accept()
-            threading.Thread(target=handle_client, args=(conn, addr, status_callback, progress_callback), daemon=True).start()
+        while not (stop_event and stop_event.is_set()):
+            try:
+                conn, addr = s.accept()
+                threading.Thread(
+                    target=handle_client,
+                    args=(conn, addr, status_callback, progress_callback),
+                    daemon=True
+                ).start()
+            except socket.timeout:
+                continue  # 🔸 перевірити stop_event знову
     except Exception as e:
         logging.error(f"Receiver thread error: {e}")
+        if status_callback:
+            status_callback(f"Receiver error: {e}")
     finally:
         s.close()
+        if status_callback:
+            status_callback("Receiver stopped.")
