@@ -37,3 +37,9 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: LANCryptor-win.zip
+        token: ${{ secrets.GH_PAT }}
+
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: LANCryptor-win.zip
