@@ -1,7 +1,7 @@
 name: Build Portable EXE
 
 on:
-  workflow_dispatch:
+  push:
   pull_request:
 
 jobs:
