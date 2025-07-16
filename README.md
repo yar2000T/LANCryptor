@@ -7,6 +7,8 @@
 ![Linted with Ruff](https://img.shields.io/badge/linter-ruff-success?logo=python)
 ![Formatted with Black](https://img.shields.io/badge/code%20style-black-000000)
 [![Build & Release](https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml)
+[![Build Portable EXE](https://github.com/yar2000T/LANCryptor/actions/workflows/build.yml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/build.yml)
+[![Code Style Check](https://github.com/yar2000T/LANCryptor/actions/workflows/format.yaml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/format.yaml)
 
 ---
 
