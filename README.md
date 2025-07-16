@@ -3,23 +3,33 @@
 </p>
 
 [//]: # (<h1 align="center">LANCryptor</h1>)
+
 <p align="center"><em>
   A simple, secure LAN file transfer app with a modern GUI built using <a href="https://github.com/TomSchimansky/CustomTkinter">CustomTkinter</a>.
   Featuring RSA + AES encryption, confirmation dialogs, and progress tracking — available via GUI or CLI.
 </em></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/>
+  <a href="https://www.python.org/downloads/">
+    <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/>
+  </a>
   <a href="https://creativecommons.org/licenses/by-nc/4.0/">
     <img src="https://img.shields.io/badge/license-CC--BY--NC--4.0-lightgrey.svg" alt="License: CC BY-NC 4.0"/>
   </a>
-  <img src="https://img.shields.io/badge/linter-ruff-success?logo=python" alt="Linter: Ruff"/>
-  <img src="https://img.shields.io/badge/code%20style-black-000000" alt="Formatter: Black"/>
+  <a href="https://github.com/charliermarsh/ruff">
+    <img src="https://img.shields.io/badge/linter-ruff-success?logo=python" alt="Linter: Ruff"/>
+  </a>
+  <a href="https://github.com/psf/black">
+    <img src="https://img.shields.io/badge/code_style-black-000000" alt="Formatter: Black"/>
+  </a>
   <a href="https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml">
-  <img src="https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml/badge.svg" alt="Build & Release"/>
-  [![Build Portable EXE](https://github.com/yar2000T/LANCryptor/actions/workflows/build.yml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/build.yml)
-  [![Code Style Check](https://github.com/yar2000T/LANCryptor/actions/workflows/format.yaml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/format.yaml)
-
+    <img src="https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml/badge.svg" alt="Build & Release"/>
+  </a>
+  <a href="https://github.com/yar2000T/LANCryptor/actions/workflows/build.yml">
+    <img src="https://github.com/yar2000T/LANCryptor/actions/workflows/build.yml/badge.svg" alt="Build Portable EXE"/>
+  </a>
+  <a href="https://github.com/yar2000T/LANCryptor/actions/workflows/format.yaml">
+    <img src="https://github.com/yar2000T/LANCryptor/actions/workflows/format.yaml/badge.svg" alt="Code Style Check"/>
   </a>
 </p>
 
