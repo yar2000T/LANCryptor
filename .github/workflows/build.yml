@@ -54,7 +54,6 @@ jobs:
 
     - name: Prepare release folder
       run: |
-        New-Item -ItemType Directory -Path release
         Copy-Item dist\LANCryptor.exe release\
         Copy-Item README.md release\
         Copy-Item LICENSE release\
