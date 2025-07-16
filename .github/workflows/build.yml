@@ -1,4 +1,4 @@
-name: Build Portable EXE
+name: Build Portable EXE and Installer
 
 on:
   push:
@@ -15,12 +15,15 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Install deps
+    - name: Install Python dependencies
       run: |
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: Build EXE
+    - name: Install NSIS
+      run: choco install nsis -y
+
+    - name: Build EXE with PyInstaller
       run: |
         pyinstaller src/main.py `
           --name LANCryptor `
@@ -31,6 +34,19 @@ jobs:
           --workpath build `
           --specpath build `
           --icon=../assets/tray.ico
+      shell: pwsh
+
+    - name: Prepare version string (use commit SHA as version)
+      id: vars
+      run: |
+        $version = "${{ github.sha }}"
+        echo "##vso[task.setvariable variable=clean_version]$version"
+      shell: pwsh
+
+    - name: Build NSIS installer
+      run: |
+        makensis /DPRODUCT_VERSION=${{ env.clean_version }} installer_script.nsi
+      shell: pwsh
 
     - name: Prepare release folder
       run: |
@@ -38,9 +54,11 @@ jobs:
         Copy-Item dist\LANCryptor.exe release\
         Copy-Item README.md release\
         Copy-Item LICENSE release\
+        Copy-Item release\LANCryptor-setup-${{ env.clean_version }}.exe
+      shell: pwsh
 
-    - name: Upload Artifact
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: LANCryptor-win
+        name: LANCryptor-Windows-Build
         path: release

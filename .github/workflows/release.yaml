@@ -18,13 +18,12 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         pip install -r requirements.txt
         pip install pyinstaller
 
     - name: Build EXE with PyInstaller
-      working-directory: ${{ github.workspace }}
       run: |
         pyinstaller src/main.py `
           --name LANCryptor `
@@ -37,25 +36,45 @@ jobs:
           --icon=../assets/tray.ico
       shell: pwsh
 
+    - name: Install NSIS
+      run: choco install nsis -y
+
+    - name: Prepare version string
+      id: vars
+      run: |
+        $tag = "${{ github.ref_name }}"
+        if ($tag.StartsWith('v')) {
+          $version = $tag.Substring(1)
+        } else {
+          $version = $tag
+        }
+        echo "##vso[task.setvariable variable=clean_version]$version"
+      shell: pwsh
+
+    - name: Build NSIS installer
+      run: |
+        makensis /DPRODUCT_VERSION=${{ env.clean_version }} installer_script.nsi
+      shell: pwsh
 
     - name: Prepare release folder
-      shell: pwsh
       run: |
         New-Item -ItemType Directory -Path release
         Copy-Item dist\LANCryptor.exe release\
         Copy-Item README.md release\
         Copy-Item LICENSE release\
+      shell: pwsh
 
     - name: Create ZIP archive
+      run: Compress-Archive -Path release\* -DestinationPath LANCryptor-portable-Windows.zip
       shell: pwsh
-      run: |
-        Compress-Archive -Path release\* -DestinationPath LANCryptor-win.zip
 
-    - name: Create or update GitHub Release and upload asset
+    - name: Create or update GitHub Release and upload assets
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
-        files: LANCryptor-win.zip
+        files: |
+          LANCryptor-portable-Windows.zip
+          LANCryptor-setup-Windows.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
