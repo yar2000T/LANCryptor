@@ -30,11 +30,15 @@ jobs:
           --workpath build `
           --specpath build
 
+    - name: Prepare release folder
+      run: |
+        New-Item -ItemType Directory -Path release
+        Copy-Item dist\LANCryptor.exe release\
+        Copy-Item README.md release\
+        Copy-Item LICENSE release\
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: LANCryptor-win
-        path: |
-          dist/LANCryptor.exe
-          README.md
-          LICENSE
+        path: release
