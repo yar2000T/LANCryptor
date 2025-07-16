@@ -30,19 +30,6 @@ jobs:
           --workpath build `
           --specpath build
 
-    - name: Clean old ZIP
-      run: |
-        if (Test-Path LANCryptor-win.zip) { Remove-Item LANCryptor-win.zip }
-
-    - name: Zip EXE
-      run: |
-        Compress-Archive -Path ./dist/LANCryptor.exe, ./README.md, ./LICENSE -DestinationPath LANCryptor-win.zip
-
-    - name: Check ZIP content
-      run: |
-        Expand-Archive -Path LANCryptor-win.zip -DestinationPath extracted
-        Get-ChildItem -Recurse extracted
-
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
