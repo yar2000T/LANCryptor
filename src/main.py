@@ -47,6 +47,9 @@ def run_cli_receive():
 
 
 if __name__ == "__main__":
+    tray_thread = threading.Thread(target=transfer.start_tray_icon, daemon=True)
+    tray_thread.start()
+
     parser = argparse.ArgumentParser(description="LANCryptor - LAN File Transfer Tool")
     subparsers = parser.add_subparsers(dest="mode", help="Modes")
 
@@ -66,3 +69,4 @@ if __name__ == "__main__":
         run_cli_send(args.ip, args.file)
     elif args.mode == "receive":
         run_cli_receive()
+

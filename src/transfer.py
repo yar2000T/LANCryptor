@@ -2,17 +2,19 @@ from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padd
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import serialization, hashes, padding
 from cryptography.hazmat.backends import default_backend
+from PIL import Image, ImageDraw
 from plyer import notification
 import threading
 import secrets
+import pystray
 import zipfile
 import logging
 import socket
 import struct
 import queue
+import time
 import io
 import os
-
 
 # Configuration
 PORT = 5001
@@ -26,7 +28,27 @@ RECEIVED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Receive
 confirmation_queue = queue.Queue()
 confirmation_event = threading.Event()
 confirmation_result = None  # True/False from UI
+v=tray_icon = None
 
+def create_image():
+    icon_path = os.path.join("..", "assets", "tray.ico")
+    return Image.open(icon_path)
+
+
+def on_quit(icon, item):
+    icon.stop()
+
+
+def start_tray_icon():
+    global tray_icon
+    icon = pystray.Icon(
+        "LANCryptor",
+        create_image(),
+        "LANCryptor",
+        menu=pystray.Menu(pystray.MenuItem("Quit", on_quit)),
+    )
+    tray_icon = icon
+    icon.run()
 
 def recv_exact(sock, n):
     data = b""
@@ -242,18 +264,22 @@ def send_file(
         logging.error("File not found. Check path.")
         if status_callback:
             status_callback(f"❌ File not found")
+            notify("LANCryptor", "File not found. Check path.")
     except ConnectionRefusedError:
         logging.error("Connection refused.")
         if status_callback:
             status_callback("❌ Connection refused. Is receiver running?")
+            notify("LANCryptor", "❌ Connection refused. Is receiver running?")
     except socket.timeout:
         logging.error("Socket timeout.")
         if status_callback:
             status_callback("❌ Timeout. No response from receiver.")
+            notify("LANCryptor", "❌ Timeout. No response from receiver.")
     except Exception as e:
         logging.exception("Unexpected error during send_file")
         if status_callback:
             status_callback(f"❌ Unexpected error: {type(e).__name__}: {e}")
+            notify("LANCryptor", f"❌ Unexpected error: {type(e).__name__}: {e}")
 
 
 def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=False):
@@ -351,18 +377,22 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=
         logging.error("Missing key file.")
         if status_callback:
             status_callback(f"❌ Key file not found")
+            notify("LANCryptor", f"❌ Key file not found")
     except socket.timeout:
         logging.error("Client connection timed out.")
         if status_callback:
             status_callback("❌ Timeout during client communication.")
+            notify("LANCryptor", "❌ Timeout during client communication.")
     except ConnectionError as e:
         logging.error(f"Connection error: {e}")
         if status_callback:
             status_callback(f"❌ Connection error: {e}")
+            notify("LANCryptor", f"❌ Connection error: {e}")
     except Exception as e:
         logging.exception("Unexpected error in handle_client")
         if status_callback:
             status_callback(f"❌ Unexpected error: {type(e).__name__}: {e}")
+            notify("LANCryptor", f"❌ Unexpected error: {type(e).__name__}: {e}")
     finally:
         conn.close()
 
@@ -395,10 +425,12 @@ def receiver_thread(
         logging.error(f"Socket bind/listen error: {e}")
         if status_callback:
             status_callback(f"❌ Network error: {e}")
+            notify("LANCryptor", f"❌ Network error: {e}")
     except Exception as e:
         logging.exception("Unexpected error in receiver_thread")
         if status_callback:
             status_callback(f"❌ Receiver error: {type(e).__name__}: {e}")
+            notify("LANCryptor", f"❌ Receiver error: {type(e).__name__}: {e}")
     finally:
         try:
             s.close()
@@ -406,10 +438,16 @@ def receiver_thread(
             pass
         if status_callback:
             status_callback("🛑 Receiver stopped.")
+            notify("LANCryptor", "🛑 Receiver stopped.")
 
 def notify(title, message):
-    notification.notify(
-        title=title,
-        message=message,
-        timeout=5
-    )
+    icon_path = os.path.join("..", "assets", "tray.ico")
+    try:
+        notification.notify(
+            title=title,
+            message=message,
+            app_icon=icon_path if os.path.exists(icon_path) else None,
+            timeout=5
+        )
+    except Exception as e:
+        print(f"Notification failed: {e}")

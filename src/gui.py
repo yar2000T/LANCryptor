@@ -1,8 +1,8 @@
 from tkinter import filedialog, messagebox
 import customtkinter as ctk
 import threading
-import queue
 import transfer
+import queue
 
 
 class PlaceholderEntry(ctk.CTkEntry):
