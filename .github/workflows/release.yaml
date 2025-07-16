@@ -34,13 +34,18 @@ jobs:
           --workpath build `
           --specpath build
 
-    - name: Clean old ZIP
+    - name: Prepare release folder
+      shell: pwsh
       run: |
-        if (Test-Path LANCryptor-win.zip) { Remove-Item LANCryptor-win.zip }
+        New-Item -ItemType Directory -Path release
+        Copy-Item dist\LANCryptor.exe release\
+        Copy-Item README.md release\
+        Copy-Item LICENSE release\
 
-    - name: Zip EXE
+    - name: Create ZIP archive
+      shell: pwsh
       run: |
-        Compress-Archive -Path dist\LANCryptor.exe, README.md, LICENSE -DestinationPath LANCryptor-win.zip
+        Compress-Archive -Path release\* -DestinationPath LANCryptor-win.zip
 
     - name: Create or update GitHub Release and upload asset
       uses: softprops/action-gh-release@v1
@@ -49,4 +54,4 @@ jobs:
         name: Release ${{ github.ref_name }}
         files: LANCryptor-win.zip
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
