@@ -30,7 +30,7 @@ jobs:
           --name LANCryptor `
           --onefile `
           --noconsole `
-          --add-data "assets;assets" `
+          --add-data "../assets;assets" `
           --distpath dist `
           --workpath build `
           --specpath build `

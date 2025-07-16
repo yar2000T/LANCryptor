@@ -20,20 +20,17 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: Build EXE with PyInstaller
-      working-directory: ${{ github.workspace }}
+    - name: Build EXE
       run: |
         pyinstaller src/main.py `
           --name LANCryptor `
           --onefile `
           --noconsole `
-          --add-data "assets;assets" `
+          --add-data "../assets;assets" `
           --distpath dist `
           --workpath build `
           --specpath build `
           --icon=assets/tray.ico
-      shell: pwsh
-
 
     - name: Prepare release folder
       run: |
