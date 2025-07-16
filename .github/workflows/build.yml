@@ -30,6 +30,10 @@ jobs:
           --workpath build `
           --specpath build
 
+    - name: Clean old ZIP
+      run: |
+        if (Test-Path LANCryptor-win.zip) { Remove-Item LANCryptor-win.zip }
+
     - name: Zip EXE
       run: |
         Compress-Archive -Path dist\LANCryptor.exe, README.md, LICENSE -DestinationPath LANCryptor-win.zip

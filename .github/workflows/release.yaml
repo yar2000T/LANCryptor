@@ -34,9 +34,13 @@ jobs:
           --workpath build `
           --specpath build
 
-    - name: Zip EXE and Docs
-      shell: pwsh
-      run: Compress-Archive -Path dist\LANCryptor.exe, README.md, LICENSE -DestinationPath LANCryptor-win.zip
+    - name: Clean old ZIP
+      run: |
+        if (Test-Path LANCryptor-win.zip) { Remove-Item LANCryptor-win.zip }
+
+    - name: Zip EXE
+      run: |
+        Compress-Archive -Path dist\LANCryptor.exe, README.md, LICENSE -DestinationPath LANCryptor-win.zip
 
     - name: Create or update GitHub Release and upload asset
       uses: softprops/action-gh-release@v1
