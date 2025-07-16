@@ -25,6 +25,7 @@ jobs:
         pyinstaller src/main.py `
           --name LANCryptor `
           --onefile `
+          --noconsole `
           --distpath dist `
           --workpath build `
           --specpath build
