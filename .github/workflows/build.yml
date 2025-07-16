@@ -30,7 +30,7 @@ jobs:
           --distpath dist `
           --workpath build `
           --specpath build `
-          --icon=assets/tray.ico
+          --icon=../assets/tray.ico
 
     - name: Prepare release folder
       run: |
