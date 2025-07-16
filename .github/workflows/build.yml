@@ -44,7 +44,7 @@ jobs:
 
     - name: Ensure release folder exists
       run: |
-        New-Item -ItemType Directory -Force -Path release
+        New-Item -ItemType Directory -Path release -Force -ErrorAction SilentlyContinue
       shell: pwsh
 
     - name: Build NSIS installer
