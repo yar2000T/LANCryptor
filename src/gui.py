@@ -44,6 +44,13 @@ class LANCryptorApp(ctk.CTk):
         ctk.set_default_color_theme("blue")  # Themes: "blue", "green", "dark-blue"
 
         self.title("LANCryptor")
+
+        try:
+            icon_path = transfer.resource_path("assets/tray.ico")
+            self.iconbitmap(icon_path)
+        except Exception as e:
+            print(f"Failed to load window icon: {e}")
+
         self.geometry("600x400")
         self.receiver_running = False
         self.history = []

@@ -69,4 +69,3 @@ if __name__ == "__main__":
         run_cli_send(args.ip, args.file)
     elif args.mode == "receive":
         run_cli_receive()
-

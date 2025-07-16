@@ -1,24 +1,36 @@
-# 🔐 LANCryptor
+<p align="center">
+  <img src="assets/banner.png" alt="LANCryptor Banner" width="400"/>
+</p>
 
-**LANCryptor** is a simple and secure LAN file transfer app with a modern UI built on [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter). It encrypts files using RSA + AES and allows sending/receiving with confirmation dialogs and progress tracking — either via GUI or from the command line.
+[//]: # (<h1 align="center">LANCryptor</h1>)
+<p align="center"><em>
+  A simple, secure LAN file transfer app with a modern GUI built using <a href="https://github.com/TomSchimansky/CustomTkinter">CustomTkinter</a>.
+  Featuring RSA + AES encryption, confirmation dialogs, and progress tracking — available via GUI or CLI.
+</em></p>
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
-![Linted with Ruff](https://img.shields.io/badge/linter-ruff-success?logo=python)
-![Formatted with Black](https://img.shields.io/badge/code%20style-black-000000)
-[![Build & Release](https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml)
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/>
+  <a href="https://creativecommons.org/licenses/by-nc/4.0/">
+    <img src="https://img.shields.io/badge/license-CC--BY--NC--4.0-lightgrey.svg" alt="License: CC BY-NC 4.0"/>
+  </a>
+  <img src="https://img.shields.io/badge/linter-ruff-success?logo=python" alt="Linter: Ruff"/>
+  <img src="https://img.shields.io/badge/code%20style-black-000000" alt="Formatter: Black"/>
+  <a href="https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml">
+    <img src="https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml/badge.svg" alt="Build & Release"/>
+  </a>
+</p>
 
 ---
 
-## 📆 Features
+## ✨ Features
 
 * 📁 Send and receive files over LAN
 * 🔒 End-to-end encryption (RSA + AES)
-* 💻 GUI built with CustomTkinter
-* 🥪 CLI mode for headless transfers
-* 🎛️ Theme switcher and tabbed interface
-* 📡 IP auto-detection and sender confirmation dialogs
-* 📜 Transfer progress and history
+* 🖥️ Clean GUI with tabbed layout
+* 💻 CLI mode for headless environments
+* 🎨 Light/dark themes with CustomTkinter
+* 🔎 Auto-detect IP & confirm sender key
+* 📊 Real-time progress bar & history log
 
 ---
 
@@ -29,7 +41,7 @@
 * Python 3.10 or newer
 * Windows, macOS, or Linux
 
-### 📦 Install dependencies
+### 📦 Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -37,9 +49,9 @@ pip install -r requirements.txt
 
 ---
 
-## 💾 Run the App
+## 💾 Running the App
 
-### 💻 GUI Mode
+### 🖥️ GUI Mode
 
 ```bash
 python src/main.py
@@ -51,13 +63,9 @@ Or explicitly:
 python src/main.py gui
 ```
 
----
+### ⚙️ Command-Line Mode
 
-### ⚙️ Command Line Mode
-
-You can also use LANCryptor directly in terminal without GUI:
-
-#### 📄 Send file
+#### 📄 Send a File
 
 ```bash
 python src/main.py send --ip <RECEIVER_IP> --file "<PATH_TO_FILE>"
@@ -67,51 +75,48 @@ Examples:
 
 ```bash
 python src/main.py send --ip 192.168.1.42 --file "test.txt"
-```
-
-```bash
 python src/main.py send --ip 192.168.0.42 --file "C:\somefolder\test.txt"
 ```
 
-#### 📅 Receive file
+#### 📅 Receive a File
 
 ```bash
 python src/main.py receive
 ```
 
-> You will be prompted to confirm sender's key hash before receiving the file.
+> You'll be prompted to approve the sender's public key hash.
 
 ---
 
-## 📂 Downloaded Files
+## 📁 Received Files Location
 
-After receiving, files are extracted to the local folder:
+All received files are auto-extracted to:
 
 ```
 ./Received/
 ```
 
-Make sure this folder exists or will be created by the app.
+The folder is created if it doesn't already exist.
 
 ---
 
-## 🧹 Format & Lint
+## 🧹 Code Quality
 
-LANCryptor uses [Ruff](https://docs.astral.sh/ruff/) and [Black](https://black.readthedocs.io/) for clean, modern Python code.
+LANCryptor follows modern Python standards using [Ruff](https://docs.astral.sh/ruff/) and [Black](https://black.readthedocs.io/).
 
-### ✨ Format with Black
+### 🖤 Format with Black
 
 ```bash
 black .
 ```
 
-### 🥪 Check with Ruff
+### 🔍 Check with Ruff
 
 ```bash
 ruff check .
 ```
 
-### 🔧 Auto-fix with Ruff
+### 💪 Auto-fix with Ruff
 
 ```bash
 ruff check . --fix
@@ -119,6 +124,7 @@ ruff check . --fix
 
 ---
 
-## 📄 License
+## 📜 License
 
-This project is licensed under the CC BY-NC 4.0 License – see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Creative Commons BY-NC 4.0**.
+See the [LICENSE](LICENSE) file for full terms.

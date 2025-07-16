@@ -2,7 +2,7 @@ from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padd
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import serialization, hashes, padding
 from cryptography.hazmat.backends import default_backend
-from PIL import Image, ImageDraw
+from PIL import Image
 from plyer import notification
 import threading
 import secrets
@@ -12,7 +12,7 @@ import logging
 import socket
 import struct
 import queue
-import time
+import sys
 import io
 import os
 
@@ -28,10 +28,19 @@ RECEIVED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Receive
 confirmation_queue = queue.Queue()
 confirmation_event = threading.Event()
 confirmation_result = None  # True/False from UI
-v=tray_icon = None
+v = tray_icon = None
+
+
+def resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    base_path = getattr(
+        sys, "_MEIPASS", os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    )
+    return os.path.join(base_path, relative_path)
+
 
 def create_image():
-    icon_path = os.path.join("..", "assets", "tray.ico")
+    icon_path = resource_path("assets/tray.ico")
     return Image.open(icon_path)
 
 
@@ -49,6 +58,7 @@ def start_tray_icon():
     )
     tray_icon = icon
     icon.run()
+
 
 def recv_exact(sock, n):
     data = b""
@@ -260,10 +270,10 @@ def send_file(
                 status_callback("File sent successfully ✅")
                 notify("LANCryptor", "File sent successfully ✅")
 
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         logging.error("File not found. Check path.")
         if status_callback:
-            status_callback(f"❌ File not found")
+            status_callback("❌ File not found")
             notify("LANCryptor", "File not found. Check path.")
     except ConnectionRefusedError:
         logging.error("Connection refused.")
@@ -373,11 +383,11 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=
             notify("LANCryptor", f"File received: {filename} ✅")
             status_callback(f"File received: {filename} ✅")
 
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         logging.error("Missing key file.")
         if status_callback:
-            status_callback(f"❌ Key file not found")
-            notify("LANCryptor", f"❌ Key file not found")
+            status_callback("❌ Key file not found")
+            notify("LANCryptor", "❌ Key file not found")
     except socket.timeout:
         logging.error("Client connection timed out.")
         if status_callback:
@@ -440,14 +450,15 @@ def receiver_thread(
             status_callback("🛑 Receiver stopped.")
             notify("LANCryptor", "🛑 Receiver stopped.")
 
+
 def notify(title, message):
-    icon_path = os.path.join("..", "assets", "tray.ico")
+    icon_path = resource_path("assets/tray.ico")
     try:
         notification.notify(
             title=title,
             message=message,
             app_icon=icon_path if os.path.exists(icon_path) else None,
-            timeout=5
+            timeout=5,
         )
     except Exception as e:
         print(f"Notification failed: {e}")

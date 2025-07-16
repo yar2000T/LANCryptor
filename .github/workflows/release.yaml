@@ -30,9 +30,11 @@ jobs:
           --name LANCryptor `
           --onefile `
           --noconsole `
+          --add-data "assets;assets" `
           --distpath dist `
           --workpath build `
-          --specpath build
+          --specpath build `
+          --icon=assets/tray.ico
 
     - name: Prepare release folder
       shell: pwsh
