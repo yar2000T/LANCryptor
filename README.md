@@ -16,7 +16,10 @@
   <img src="https://img.shields.io/badge/linter-ruff-success?logo=python" alt="Linter: Ruff"/>
   <img src="https://img.shields.io/badge/code%20style-black-000000" alt="Formatter: Black"/>
   <a href="https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml">
-    <img src="https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml/badge.svg" alt="Build & Release"/>
+  <img src="https://github.com/yar2000T/LANCryptor/actions/workflows/release.yaml/badge.svg" alt="Build & Release"/>
+  [![Build Portable EXE](https://github.com/yar2000T/LANCryptor/actions/workflows/build.yml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/build.yml)
+  [![Code Style Check](https://github.com/yar2000T/LANCryptor/actions/workflows/format.yaml/badge.svg)](https://github.com/yar2000T/LANCryptor/actions/workflows/format.yaml)
+
   </a>
 </p>
 
@@ -75,6 +78,9 @@ Examples:
 
 ```bash
 python src/main.py send --ip 192.168.1.42 --file "test.txt"
+```
+
+```bash
 python src/main.py send --ip 192.168.0.42 --file "C:\somefolder\test.txt"
 ```
 
