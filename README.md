@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="LANCryptor Banner" width="400"/>
+  <img src="assets/banner.png" alt="LANCryptor Banner" width="700"/>
 </p>
 
 [//]: # (<h1 align="center">LANCryptor</h1>)
