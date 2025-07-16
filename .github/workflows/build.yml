@@ -38,7 +38,7 @@ jobs:
 
     - name: Prepare version string (use short SHA)
       run: |
-        $short = "${{ github.sha.Substring(0, 7) }}"
+        $short = "${{ github.sha }}".Substring(0, 7)
         echo "clean_version=$short" >> $env:GITHUB_ENV
       shell: pwsh
 
@@ -59,4 +59,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: LANCryptor-Windows-Build
-        path: release
+        path: release/**
