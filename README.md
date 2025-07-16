@@ -64,36 +64,6 @@ ruff check .
 ruff check . --fix
 ```
 
-> You can also configure both tools via `pyproject.toml`.
-
----
-
-## ⚙️ Project Structure
-
-```
-LANCryptor/
-├── src/
-│   ├── main.py
-│   ├── gui.py
-│   └── transfer.py
-├── Received/
-├── requirements.txt
-└── README.md
-```
-
----
-
-## ⚙️ Maintainer Tips
-
-* Use `venv` to isolate dependencies:
-
-  ```bash
-  python -m venv .venv
-  .venv\Scripts\activate  # Windows
-  source .venv/bin/activate  # Unix
-  ```
-* Enable formatting and linting on save in your IDE (e.g. VS Code with Python extension)
-
 ---
 
 ## 📅 Downloads
