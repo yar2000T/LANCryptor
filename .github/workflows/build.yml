@@ -20,6 +20,10 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
+    - name: Clean dist folder
+      run: |
+        Remove-Item -Path dist\* -Force -Recurse
+
     - name: Build EXE
       run: |
         pyinstaller src/main.py `
@@ -36,7 +40,12 @@ jobs:
 
     - name: Zip EXE
       run: |
-        Compress-Archive -Path dist\LANCryptor.exe, README.md, LICENSE -DestinationPath LANCryptor-win.zip
+        Compress-Archive -Path ./dist/LANCryptor.exe, ./README.md, ./LICENSE -DestinationPath LANCryptor-win.zip
+
+    - name: Check ZIP content
+      run: |
+        Expand-Archive -Path LANCryptor-win.zip -DestinationPath extracted
+        Get-ChildItem -Recurse extracted
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
