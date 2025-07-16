@@ -18,7 +18,6 @@
 * 🔒 End-to-end encryption (RSA + AES)
 * 💻 GUI built with CustomTkinter
 * 🥪 CLI mode for headless transfers
-* 🎛️ Theme switcher and tabbed interface
 * 📡 IP auto-detection and sender confirmation dialogs
 * 📜 Transfer progress and history
 
