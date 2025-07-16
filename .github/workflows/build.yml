@@ -39,7 +39,7 @@ jobs:
     - name: Prepare version string (use commit SHA as version)
       id: vars
       run: |
-        $version = "${{ github.sha }}"
+        $version = "${{ github.sha.Substring(0, 7) }}"
         echo "clean_version=$version" >> $env:GITHUB_ENV
       shell: pwsh
 
