@@ -127,7 +127,7 @@ def confirm_receiver(pubkey_hash: str, cli: bool) -> bool:
     global confirmation_result
 
     if cli:
-        print(f"\nIncoming connection request.")
+        print("\nIncoming connection request.")
         print(f"Sender public key hash:\n  {pubkey_hash}")
         while True:
             answer = input("Accept connection? [y/n]: ").strip().lower()
@@ -334,7 +334,9 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=
         conn.close()
 
 
-def receiver_thread(status_callback=None, progress_callback=None, stop_event=None, cli=False):
+def receiver_thread(
+    status_callback=None, progress_callback=None, stop_event=None, cli=False
+):
     generate_keys()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

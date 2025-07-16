@@ -12,21 +12,28 @@ def run_gui():
 
 
 def run_cli_send(ip, file):
-    def progress(p): print(f"[SEND] Progress: {p:.2f}%")
-    def status(msg): print(f"[SEND] {msg}")
+    def progress(p):
+        print(f"[SEND] Progress: {p:.2f}%")
+
+    def status(msg):
+        print(f"[SEND] {msg}")
+
     transfer.send_file(ip, file, progress_callback=progress, status_callback=status)
 
 
 def run_cli_receive():
-    def progress(p): print(f"[RECV] Progress: {p:.2f}%")
-    def status(msg): print(f"[RECV] {msg}")
+    def progress(p):
+        print(f"[RECV] Progress: {p:.2f}%")
+
+    def status(msg):
+        print(f"[RECV] {msg}")
 
     stop_event = threading.Event()
     t = threading.Thread(
         target=transfer.receiver_thread,
         args=(status, progress, stop_event),
         kwargs={"cli": True},
-        daemon=True
+        daemon=True,
     )
     t.start()
 
