@@ -78,6 +78,6 @@ jobs:
         name: Release ${{ github.ref_name }}
         files: |
           LANCryptor-portable-Windows.zip
-          release/LANCryptor-setup-${{ env.clean_version }}.exe
+          release/LANCryptor-setup-Windows.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

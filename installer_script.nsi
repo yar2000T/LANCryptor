@@ -3,10 +3,10 @@
 !endif
 
 !define PRODUCT_NAME "LANCryptor"
-!define PRODUCT_PUBLISHER "Your Company or Name"
+!define PRODUCT_PUBLISHER "yar2000T"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
-OutFile "release\LANCryptor-setup-${PRODUCT_VERSION}.exe"
+OutFile "release\LANCryptor-setup-Windows.exe"
 InstallDir "$PROGRAMFILES\LANCryptor"
 
 Page directory
