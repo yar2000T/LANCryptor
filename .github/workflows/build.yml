@@ -36,11 +36,10 @@ jobs:
           --icon=../assets/tray.ico
       shell: pwsh
 
-    - name: Prepare version string (use commit SHA as version)
-      id: vars
+    - name: Prepare version string (use short SHA)
       run: |
-        $version = "${{ github.sha.Substring(0, 7) }}"
-        echo "clean_version=$version" >> $env:GITHUB_ENV
+        $short = "${{ github.sha.Substring(0, 7) }}"
+        echo "clean_version=$short" >> $env:GITHUB_ENV
       shell: pwsh
 
     - name: Build NSIS installer
@@ -54,7 +53,6 @@ jobs:
         Copy-Item dist\LANCryptor.exe release\
         Copy-Item README.md release\
         Copy-Item LICENSE release\
-        Copy-Item release\LANCryptor-setup-${{ env.clean_version }}.exe
       shell: pwsh
 
     - name: Upload build artifacts
