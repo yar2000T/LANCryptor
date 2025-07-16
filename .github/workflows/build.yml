@@ -40,7 +40,7 @@ jobs:
       id: vars
       run: |
         $version = "${{ github.sha }}"
-        echo "##vso[task.setvariable variable=clean_version]$version"
+        echo "clean_version=$version" >> $env:GITHUB_ENV
       shell: pwsh
 
     - name: Build NSIS installer
