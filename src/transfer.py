@@ -123,13 +123,25 @@ def decompress_file(zip_data):
         zip_file.extractall(RECEIVED_DIR)
 
 
-def confirm_receiver(pubkey_hash: str) -> bool:
-    """Called in receiver thread, blocks until UI thread sets the result."""
+def confirm_receiver(pubkey_hash: str, cli: bool) -> bool:
     global confirmation_result
-    confirmation_queue.put(pubkey_hash)
-    confirmation_event.wait()
-    confirmation_event.clear()
-    return confirmation_result
+
+    if cli:
+        print(f"\nIncoming connection request.")
+        print(f"Sender public key hash:\n  {pubkey_hash}")
+        while True:
+            answer = input("Accept connection? [y/n]: ").strip().lower()
+            if answer in ("y", "yes"):
+                return True
+            elif answer in ("n", "no"):
+                return False
+            else:
+                print("Please type 'y' or 'n'.")
+    else:
+        confirmation_queue.put(pubkey_hash)
+        confirmation_event.wait()
+        confirmation_event.clear()
+        return confirmation_result
 
 
 def set_confirmation_result(result: bool):
@@ -227,7 +239,7 @@ def send_file(
             status_callback(f"Error: {e}")
 
 
-def handle_client(conn, addr, status_callback=None, progress_callback=None):
+def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=False):
     try:
         conn.settimeout(60)
         if conn.recv(1024) != b"REQ_PUBLIC_KEY":
@@ -251,7 +263,7 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None):
             )
 
         # Ask UI to confirm receiver public key hash
-        confirmed = confirm_receiver(receiver_pubkey_hash)
+        confirmed = confirm_receiver(receiver_pubkey_hash, cli=cli)
         if not confirmed:
             if status_callback:
                 status_callback("Connection rejected by user.")
@@ -322,13 +334,13 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None):
         conn.close()
 
 
-def receiver_thread(status_callback=None, progress_callback=None, stop_event=None):
+def receiver_thread(status_callback=None, progress_callback=None, stop_event=None, cli=False):
     generate_keys()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(("", PORT))
     s.listen()
-    s.settimeout(1.0)  # 🔸 дозволяє перевіряти stop_event кожну секунду
+    s.settimeout(1.0)
 
     if status_callback:
         status_callback("Listening for incoming files...")
@@ -339,11 +351,11 @@ def receiver_thread(status_callback=None, progress_callback=None, stop_event=Non
                 conn, addr = s.accept()
                 threading.Thread(
                     target=handle_client,
-                    args=(conn, addr, status_callback, progress_callback),
+                    args=(conn, addr, status_callback, progress_callback, cli),
                     daemon=True,
                 ).start()
             except socket.timeout:
-                continue  # 🔸 перевірити stop_event знову
+                continue
     except Exception as e:
         logging.error(f"Receiver thread error: {e}")
         if status_callback:

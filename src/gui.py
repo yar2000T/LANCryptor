@@ -174,6 +174,7 @@ class LANCryptorApp(ctk.CTk):
                 self._update_recv_progress,
                 self.stop_event,
             ),
+            kwargs={"cli": False},
             daemon=True,
         )
         self.receive_thread.start()
