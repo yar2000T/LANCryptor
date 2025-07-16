@@ -1,16 +1,18 @@
-import os
-import socket
-import struct
-import secrets
-import zipfile
-import io
-import logging
-import threading
-import queue
-from cryptography.hazmat.primitives import serialization, hashes, padding
 from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding, rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import serialization, hashes, padding
 from cryptography.hazmat.backends import default_backend
+from plyer import notification
+import threading
+import secrets
+import zipfile
+import logging
+import socket
+import struct
+import queue
+import io
+import os
+
 
 # Configuration
 PORT = 5001
@@ -186,6 +188,7 @@ def send_file(
             if confirmation_byte != b"\x01":
                 if status_callback:
                     status_callback("Receiver rejected the connection.")
+                    notify("LANCryptor", "Receiver rejected the connection.")
                 s.close()
                 return
 
@@ -233,10 +236,24 @@ def send_file(
 
             if status_callback:
                 status_callback("File sent successfully ✅")
-    except Exception as e:
-        logging.error(f"Error sending file: {e}")
+                notify("LANCryptor", "File sent successfully ✅")
+
+    except FileNotFoundError as e:
+        logging.error("File not found. Check path.")
         if status_callback:
-            status_callback(f"Error: {e}")
+            status_callback(f"❌ File not found")
+    except ConnectionRefusedError:
+        logging.error("Connection refused.")
+        if status_callback:
+            status_callback("❌ Connection refused. Is receiver running?")
+    except socket.timeout:
+        logging.error("Socket timeout.")
+        if status_callback:
+            status_callback("❌ Timeout. No response from receiver.")
+    except Exception as e:
+        logging.exception("Unexpected error during send_file")
+        if status_callback:
+            status_callback(f"❌ Unexpected error: {type(e).__name__}: {e}")
 
 
 def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=False):
@@ -267,6 +284,7 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=
         if not confirmed:
             if status_callback:
                 status_callback("Connection rejected by user.")
+                notify("LANCryptor", "Connection rejected by user.")
             conn.sendall(b"\x00")
             conn.close()
             return
@@ -295,6 +313,7 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=
         while written < filesize:
             chunk = conn.recv(min(BUFFER_SIZE, filesize - written))
             if not chunk:
+                notify("LANCryptor", "Connection lost during file receive")
                 raise ConnectionError("Connection lost during file receive")
             written += len(chunk)
             decrypted = decryptor.update(chunk)
@@ -325,11 +344,25 @@ def handle_client(conn, addr, status_callback=None, progress_callback=None, cli=
 
         decompress_file(unpadded_data)
         if status_callback:
+            notify("LANCryptor", f"File received: {filename} ✅")
             status_callback(f"File received: {filename} ✅")
-    except Exception as e:
-        logging.error(f"Error handling client: {e}")
+
+    except FileNotFoundError as e:
+        logging.error("Missing key file.")
         if status_callback:
-            status_callback(f"Error: {e}")
+            status_callback(f"❌ Key file not found")
+    except socket.timeout:
+        logging.error("Client connection timed out.")
+        if status_callback:
+            status_callback("❌ Timeout during client communication.")
+    except ConnectionError as e:
+        logging.error(f"Connection error: {e}")
+        if status_callback:
+            status_callback(f"❌ Connection error: {e}")
+    except Exception as e:
+        logging.exception("Unexpected error in handle_client")
+        if status_callback:
+            status_callback(f"❌ Unexpected error: {type(e).__name__}: {e}")
     finally:
         conn.close()
 
@@ -358,11 +391,25 @@ def receiver_thread(
                 ).start()
             except socket.timeout:
                 continue
+    except OSError as e:
+        logging.error(f"Socket bind/listen error: {e}")
+        if status_callback:
+            status_callback(f"❌ Network error: {e}")
     except Exception as e:
-        logging.error(f"Receiver thread error: {e}")
+        logging.exception("Unexpected error in receiver_thread")
         if status_callback:
-            status_callback(f"Receiver error: {e}")
+            status_callback(f"❌ Receiver error: {type(e).__name__}: {e}")
     finally:
-        s.close()
+        try:
+            s.close()
+        except Exception:
+            pass
         if status_callback:
-            status_callback("Receiver stopped.")
+            status_callback("🛑 Receiver stopped.")
+
+def notify(title, message):
+    notification.notify(
+        title=title,
+        message=message,
+        timeout=5
+    )
