@@ -23,6 +23,9 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
+    - name: Install NSIS
+      run: choco install nsis -y
+
     - name: Build EXE with PyInstaller
       run: |
         pyinstaller src/main.py `
@@ -36,19 +39,20 @@ jobs:
           --icon=../assets/tray.ico
       shell: pwsh
 
-    - name: Install NSIS
-      run: choco install nsis -y
-
-    - name: Prepare version string
-      id: vars
+    - name: Prepare version string from tag
       run: |
         $tag = "${{ github.ref_name }}"
-        if ($tag.StartsWith('v')) {
+        if ($tag.StartsWith("v")) {
           $version = $tag.Substring(1)
         } else {
           $version = $tag
         }
-        echo "##vso[task.setvariable variable=clean_version]$version"
+        echo "clean_version=$version" >> $env:GITHUB_ENV
+      shell: pwsh
+
+    - name: Ensure release folder exists
+      run: |
+        New-Item -ItemType Directory -Path release -Force -ErrorAction SilentlyContinue
       shell: pwsh
 
     - name: Build NSIS installer
@@ -56,9 +60,8 @@ jobs:
         makensis /DPRODUCT_VERSION=${{ env.clean_version }} installer_script.nsi
       shell: pwsh
 
-    - name: Prepare release folder
+    - name: Prepare release folder contents
       run: |
-        New-Item -ItemType Directory -Path release
         Copy-Item dist\LANCryptor.exe release\
         Copy-Item README.md release\
         Copy-Item LICENSE release\
@@ -68,13 +71,13 @@ jobs:
       run: Compress-Archive -Path release\* -DestinationPath LANCryptor-portable-Windows.zip
       shell: pwsh
 
-    - name: Create or update GitHub Release and upload assets
+    - name: Create GitHub Release and upload assets
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
         files: |
           LANCryptor-portable-Windows.zip
-          LANCryptor-setup-Windows.exe
+          release/LANCryptor-setup-${{ env.clean_version }}.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
