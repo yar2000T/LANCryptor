@@ -35,14 +35,17 @@
 
 ---
 
+[//]: # (> ℹ️ macOS and Linux builds are generated automatically, but not manually tested due to lack of test environment.)
+
+[//]: # (> Community testing & feedback welcome! 🙏)
+
 ## ✨ Features
 
 * 📁 Send and receive files over LAN
 * 🔒 End-to-end encryption (RSA + AES)
 * 🖥️ Clean GUI with tabbed layout
 * 💻 CLI mode for headless environments
-* 🎨 Light/dark themes with CustomTkinter
-* 🔎 Auto-detect IP & confirm sender key
+* 🔎 Confirm sender key
 * 📊 Real-time progress bar & history log
 
 ---
@@ -115,6 +118,14 @@ All received files are auto-extracted to:
 The folder is created if it doesn't already exist.
 
 ---
+
+[//]: # (## 🙋‍♀️ Want to Help?)
+
+[//]: # ()
+[//]: # (If you use macOS or Linux, feel free to test LANCryptor and [open an issue]&#40;https://github.com/yar2000T/LANCryptor/issues&#41; if anything breaks. Community contributions are welcome!)
+
+[//]: # ()
+[//]: # (---)
 
 ## 🧹 Code Quality
 
