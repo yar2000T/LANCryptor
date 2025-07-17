@@ -25,6 +25,7 @@ def log_platform_info():
     if system == "Linux":
         try:
             import distro
+
             distro_info = distro.linux_distribution(full_distribution_name=True)
             distro_str = f"{distro_info[0]} {distro_info[1]}"
         except ImportError:
@@ -77,7 +78,9 @@ def run_cli_receive():
 
 if __name__ == "__main__":
     log_platform_info()
-    print(f"[Platform] OS: {system} {release} ({distro_str}) | Arch: {arch}| Python: {python_version}")
+    print(
+        f"[Platform] OS: {system} {release} ({distro_str}) | Arch: {arch}| Python: {python_version}"
+    )
     tray_thread = threading.Thread(target=transfer.start_tray_icon, daemon=True)
     tray_thread.start()
 
