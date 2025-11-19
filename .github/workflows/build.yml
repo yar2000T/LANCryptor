@@ -23,6 +23,13 @@ jobs:
     - name: Install NSIS
       run: choco install nsis -y
 
+    - name: Add NSIS to PATH
+      run: |
+        $nsisPath = (Get-ChildItem "C:\Program Files*" -Recurse -Filter makensis.exe | Select-Object -First 1).DirectoryName
+        echo "NSIS path = $nsisPath"
+        echo "$nsisPath" >> $env:GITHUB_PATH
+      shell: pwsh
+
     - name: Build EXE with PyInstaller
       run: |
         pyinstaller src/main.py `
