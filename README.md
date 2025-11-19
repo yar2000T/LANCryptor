@@ -5,7 +5,7 @@
 [//]: # (<h1 align="center">LANCryptor</h1>)
 
 <p align="center"><em>
-  A simple, secure LAN file transfer app with a modern GUI built using <a href="https://github.com/TomSchimansky/CustomTkinter">CustomTkinter</a>.
+  A simple, secure LAN file transfer app with a modern GUI.<br>
   Featuring RSA + AES encryption, confirmation dialogs, and progress tracking — available via GUI or CLI.
 </em></p>
 
