@@ -86,7 +86,6 @@ python src/main.py gui
 ```bash
 python src/main.py send --ip <RECEIVER_IP> --file "<PATH_TO_FILE>"
 ```
-
 Examples:
 
 ```bash
